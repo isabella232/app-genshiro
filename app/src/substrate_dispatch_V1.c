@@ -19,12 +19,72 @@
 #include "zxmacros.h"
 #include <stdint.h>
 
+#define GET_CALL_PRIV_IDX(pallet_id, method_id) ((uint16_t)pallet_id << 8u) + method_id
+
+#define PALLET_ID_UTILITY        1
+#define PALLET_ID_EQBALANCES    13
+#define PALLET_ID_VESTING       22
+#define PALLET_ID_SUBACCOUNTS   24
+#define PALLET_ID_EQBRIDGE      27
+#define PALLET_ID_CURVE_AMM     31
+
+// Utility pallet
+#define METHOD_ID_BATCH 0
+#define PRIV_ID_BATCH GET_CALL_PRIV_IDX(PALLET_ID_UTILITY, METHOD_ID_BATCH)
+
+// EqBalances pallet
+#define METHOD_ID_TRANSFER 0
+#define PRIV_ID_TRANSFER GET_CALL_PRIV_IDX(PALLET_ID_EQBALANCES, METHOD_ID_TRANSFER)
+
+// Vesting pallet
+#define METHOD_ID_VEST 0
+#define PRIV_ID_VEST GET_CALL_PRIV_IDX(PALLET_ID_VESTING, METHOD_ID_VEST)
+
+// Subaccounts pallet
+#define METHOD_ID_TRANSFER_TO_SUBACC    0
+#define METHOD_ID_TRANSFER_FROM_SUBACC  1
+#define PRIV_ID_TRANSFER_TO_SUBACC   GET_CALL_PRIV_IDX(PALLET_ID_SUBACCOUNTS, METHOD_ID_TRANSFER_TO_SUBACC)
+#define PRIV_ID_TRANSFER_FROM_SUBACC GET_CALL_PRIV_IDX(PALLET_ID_SUBACCOUNTS, METHOD_ID_TRANSFER_FROM_SUBACC)
+
+// EqBridge pallet
+#define METHOD_ID_TRANSFER_NATIVE 0
+#define PRIV_ID_BRIDGE_TRANSFER_NATIVE GET_CALL_PRIV_IDX(PALLET_ID_EQBRIDGE, METHOD_ID_TRANSFER_NATIVE)
+
+// idx: 1 name: "add_liquidity" args count: 3
+//	idx: 2 name: "exchange" args count: 5
+//	idx: 3 name: "remove_liquidity" args count: 3
+//	idx: 4 name: "remove_liquidity_imbalance" args count: 3
+//	idx: 5 name: "remove_liquidity_one_coin" args count: 4
+
+
+// CurveAmm pallet
+#define METHOD_ID_ADD_LIQUIDITY                 1
+#define METHOD_ID_EXCHANGE                      2
+#define METHOD_ID_REMOVE_LIQUIDITY              3
+#define METHOD_ID_REMOVE_LIQUIDITY_IMBALANCE    4
+#define METHOD_ID_REMOVE_LIQUIDITY_ONE_COIN     5
+
+#define PRIV_ID_CURVE_ADD_LIQUIDITY                 GET_CALL_PRIV_IDX(PALLET_ID_CURVE_AMM, METHOD_ID_ADD_LIQUIDITY)
+#define PRIV_ID_CURVE_EXCHANGE                      GET_CALL_PRIV_IDX(PALLET_ID_CURVE_AMM, METHOD_ID_EXCHANGE)
+#define PRIV_ID_CURVE_REMOVE_LIQUIDITY              GET_CALL_PRIV_IDX(PALLET_ID_CURVE_AMM, METHOD_ID_REMOVE_LIQUIDITY)
+#define PRIV_ID_CURVE_REMOVE_LIQUIDITY_IMBALANCE    GET_CALL_PRIV_IDX(PALLET_ID_CURVE_AMM, METHOD_ID_REMOVE_LIQUIDITY_IMBALANCE)
+#define PRIV_ID_CURVE_REMOVE_LIQUIDITY_ONE_COIN     GET_CALL_PRIV_IDX(PALLET_ID_CURVE_AMM, METHOD_ID_REMOVE_LIQUIDITY_ONE_COIN)
+
+
+/// Pallet Utility
+__Z_INLINE parser_error_t _readMethod_utility_batch_V1(
+    parser_context_t* c, pd_utility_batch_V1_t* m)
+{
+    CHECK_ERROR(_readVecCall(c, &m->calls))
+    return parser_ok;
+}
+
 /// Pallet EqBalances
 __Z_INLINE parser_error_t _readMethod_eqbalances_transfer_V1(
     parser_context_t* c, pd_eqbalances_transfer_V1_t* m)
 {
-    CHECK_ERROR(_readAsset(c, &m->asset));
-    CHECK_ERROR(_readAccountId_V1(c, &m->to));
+    CHECK_ERROR(_readAsset(c, &m->asset))
+    CHECK_ERROR(_readAccountId_V1(c, &m->to))
     CHECK_ERROR(_readBalance(c, &m->amount))
     return parser_ok;
 }
@@ -40,8 +100,8 @@ __Z_INLINE parser_error_t _readMethod_vesting_vest_V1(
 __Z_INLINE parser_error_t _readMethod_subaccounts_transfer_to_subaccount_V1(
     parser_context_t* c, pd_subaccounts_transfer_to_subaccount_V1_t* m)
 {
-    CHECK_ERROR(_readSubAccount_V1(c, &m->subAccType));
-    CHECK_ERROR(_readAsset(c, &m->asset));
+    CHECK_ERROR(_readSubAccount_V1(c, &m->subAccType))
+    CHECK_ERROR(_readAsset(c, &m->asset))
     CHECK_ERROR(_readBalance(c, &m->amount))
     return parser_ok;
 }
@@ -49,8 +109,8 @@ __Z_INLINE parser_error_t _readMethod_subaccounts_transfer_to_subaccount_V1(
 __Z_INLINE parser_error_t _readMethod_subaccounts_transfer_from_subaccount_V1(
         parser_context_t* c, pd_subaccounts_transfer_from_subaccount_V1_t* m)
 {
-    CHECK_ERROR(_readSubAccount_V1(c, &m->subAccType));
-    CHECK_ERROR(_readAsset(c, &m->asset));
+    CHECK_ERROR(_readSubAccount_V1(c, &m->subAccType))
+    CHECK_ERROR(_readAsset(c, &m->asset))
     CHECK_ERROR(_readBalance(c, &m->amount))
     return parser_ok;
 }
@@ -61,25 +121,32 @@ __Z_INLINE parser_error_t  _readMethod_eqbridge_transfer_native_V1(
 {
     CHECK_ERROR(_readBalance(c, &m->amount))
     CHECK_ERROR(_readBytes(c, &m->recipient))
-    CHECK_ERROR(_readChainId_V1(c, &m->chainId));
+    CHECK_ERROR(_readChainId_V1(c, &m->chainId))
     CHECK_ERROR(_readu8_array_32_V1(c, &m->resourceId))
     return parser_ok;
 }
 
-/// Pallet EqLockdrop
-__Z_INLINE parser_error_t _readMethod_eqlockdrop_lock_V1(
-    parser_context_t* c, pd_eqlockdrop_lock_V1_t* m)
+/// Pallet CurveAmm
+//__Z_INLINE parser_error_t  _readMethod_curveAmm_add_liquidity_V1(
+//        parser_context_t* c, pd_eqbridge_transfer_native_V1_t* m)
+//{
+//CHECK_ERROR(_readBalance(c, &m->amount))
+//CHECK_ERROR(_readBytes(c, &m->recipient))
+//CHECK_ERROR(_readChainId_V1(c, &m->chainId));
+//CHECK_ERROR(_readu8_array_32_V1(c, &m->resourceId))
+//return parser_ok;
+//}
+
+__Z_INLINE parser_error_t  _readMethod_curveAmm_exchange_V1(
+    parser_context_t* c, pd_curveAmm_exchange_V1_t* m)
 {
-    CHECK_ERROR(_readBalance(c, &m->amount))
+    CHECK_ERROR(_readu32(c, &m->poolId))
+    CHECK_ERROR(_readu32(c, &m->poolTokenId_i))
+    CHECK_ERROR(_readu32(c, &m->poolTokenId_j))
+    CHECK_ERROR(_readBalance(c, &m->dx))
+    CHECK_ERROR(_readBalance(c, &m->min_dy))
     return parser_ok;
 }
-
-__Z_INLINE parser_error_t _readMethod_eqlockdrop_unlock_external_V1(
-    parser_context_t* c, pd_eqlockdrop_unlock_external_V1_t* m)
-{
-    return parser_ok;
-}
-
 
 parser_error_t _readMethod_V1(
     parser_context_t* c,
@@ -90,29 +157,38 @@ parser_error_t _readMethod_V1(
     uint16_t callPrivIdx = ((uint16_t)moduleIdx << 8u) + callIdx;
 
     switch (callPrivIdx) {
+            /// Pallet Utility
+        case PRIV_ID_BATCH:
+            CHECK_ERROR(_readMethod_utility_batch_V1(c, &method->basic.utility_batch_V1))
+            break;
+
             /// Pallet EqBalances
-        case 3328: /* module 13 call 0 */
-        CHECK_ERROR(_readMethod_eqbalances_transfer_V1(c, &method->basic.eqbalances_transfer_V1))
+        case PRIV_ID_TRANSFER:
+            CHECK_ERROR(_readMethod_eqbalances_transfer_V1(c, &method->nested.eqbalances_transfer_V1))
             break;
 
             /// Pallet Vesting
-        case 5632: /* module 22 call 0 */
-        CHECK_ERROR(_readMethod_vesting_vest_V1(c, &method->basic.vesting_vest_V1))
+        case PRIV_ID_VEST:
+            CHECK_ERROR(_readMethod_vesting_vest_V1(c, &method->basic.vesting_vest_V1))
             break;
 
             /// Pallet Subaccounts
-        case 6144: /* module 24 call 0 */
-        CHECK_ERROR(_readMethod_subaccounts_transfer_to_subaccount_V1(c, &method->basic.subaccounts_transfer_to_subaccount_V1))
+        case PRIV_ID_TRANSFER_TO_SUBACC:
+            CHECK_ERROR(_readMethod_subaccounts_transfer_to_subaccount_V1(c, &method->nested.subaccounts_transfer_to_subaccount_V1))
             break;
-        case 6145: /* module 24 call 1 */
-        CHECK_ERROR(_readMethod_subaccounts_transfer_from_subaccount_V1(c, &method->basic.subaccounts_transfer_from_subaccount_V1))
+        case PRIV_ID_TRANSFER_FROM_SUBACC:
+            CHECK_ERROR(_readMethod_subaccounts_transfer_from_subaccount_V1(c, &method->nested.subaccounts_transfer_from_subaccount_V1))
             break;
 
             /// Pallet EqBridge
-        case 6912: /* module 27 call 0 */
-        CHECK_ERROR(_readMethod_eqbridge_transfer_native_V1(c, &method->basic.eqbridge_transfer_native_V1))
+        case PRIV_ID_BRIDGE_TRANSFER_NATIVE:
+            CHECK_ERROR(_readMethod_eqbridge_transfer_native_V1(c, &method->basic.curveAmm_exchange_V1))
             break;
 
+            /// Pallet CurveAmm
+        case PRIV_ID_CURVE_EXCHANGE:
+            CHECK_ERROR(_readMethod_curveAmm_exchange_V1(c, &method->basic.eqbridge_transfer_native_V1))
+            break;
     default:
         return parser_not_supported;
     }
@@ -128,15 +204,18 @@ parser_error_t _readMethod_V1(
 const char* _getMethod_ModuleName_V1(uint8_t moduleIdx)
 {
     switch (moduleIdx) {
-    case 13:
+    case PALLET_ID_UTILITY:
+        return STR_MO_UTILITY;
+    case PALLET_ID_EQBALANCES:
         return STR_MO_EQBALANCES;
-    case 22:
+    case PALLET_ID_VESTING:
         return STR_MO_VESTING;
-    case 24:
+    case PALLET_ID_SUBACCOUNTS:
         return STR_MO_SUBACCOUNTS;
-    case 27:
+    case PALLET_ID_EQBRIDGE:
         return STR_MO_EQBRIDGE;
-
+    case PALLET_ID_CURVE_AMM:
+        return STR_MO_CURVE_AMM;
     default:
         return NULL;
     }
@@ -149,18 +228,23 @@ const char* _getMethod_Name_V1(uint8_t moduleIdx, uint8_t callIdx)
     uint16_t callPrivIdx = ((uint16_t)moduleIdx << 8u) + callIdx;
 
     switch (callPrivIdx) {
-    case 3328: /* module 13 call 0 */    // EqBalances:transfer
+    case PRIV_ID_BATCH:
+        return STR_ME_BATCH;
+    case PRIV_ID_TRANSFER:                        // EqBalances:transfer
         return STR_ME_TRANSFER;
-    case 5632: /* module 22 call 0 */   // Vesting:vest
+    case PRIV_ID_VEST:                            // Vesting:vest
         return STR_ME_VEST;
 
-    case 6144: /* module 24 call 0 */
+    case PRIV_ID_TRANSFER_TO_SUBACC:
         return STR_ME_TRANSFER_TO_SUBACCOUNT;     // Subaccounts:transfer_to_subaccount
-    case 6145: /* module 24 call 1 */
+    case PRIV_ID_TRANSFER_FROM_SUBACC:
         return STR_ME_TRANSFER_FROM_SUBACCOUNT;   // Subaccounts:transfer_from_subaccount
 
-    case 6912: /* module 27 call 0 */
-        return STR_ME_TRANSFER_NATIVE; // EqBridge:transfer_native
+    case PRIV_ID_BRIDGE_TRANSFER_NATIVE:
+        return STR_ME_TRANSFER_NATIVE;            // EqBridge:transfer_native
+
+    case PRIV_ID_CURVE_EXCHANGE:                  // CurveAmm:exchange
+        return STR_ME_EXCHANGE;
 
     default:
         return NULL;
@@ -174,16 +258,20 @@ uint8_t _getMethod_NumItems_V1(uint8_t moduleIdx, uint8_t callIdx)
     uint16_t callPrivIdx = ((uint16_t)moduleIdx << 8u) + callIdx;
 
     switch (callPrivIdx) {
-    case 3328: /* module 13 call 0 */ // EqBalances:transfer
+    case PRIV_ID_BATCH:                     // Utility:batch
+        return 1;
+    case PRIV_ID_TRANSFER:                  // EqBalances:transfer
         return 3;
-    case 5632: /* module 22  call 0 */ // Vesting:vest
+    case PRIV_ID_VEST:                      // Vesting:vest
         return 0;
-    case 6144: /* module 24 call 0 */ // Subaccounts:transfer_to_subaccount
+    case PRIV_ID_TRANSFER_TO_SUBACC:        // Subaccounts:transfer_to_subaccount
         return 3;
-    case 6145: /* module 24 call 1 */ // Subaccounts:transfer_from_subaccount
+    case PRIV_ID_TRANSFER_FROM_SUBACC:      // Subaccounts:transfer_from_subaccount
         return 3;
-    case 6912: /* module 27 call 0 */ // EqBridge:transfer_native
+    case PRIV_ID_BRIDGE_TRANSFER_NATIVE:    // EqBridge:transfer_native
         return 4;
+    case PRIV_ID_CURVE_EXCHANGE:            // CurveAmm:exchange
+        return 5;
     default:
         return 0;
     }
@@ -196,8 +284,14 @@ const char* _getMethod_ItemName_V1(uint8_t moduleIdx, uint8_t callIdx, uint8_t i
     uint16_t callPrivIdx = ((uint16_t)moduleIdx << 8u) + callIdx;
 
     switch (callPrivIdx) {
-
-    case 3328: /* module 9 -> 10 call 0 */ // EqBalances:transfer(asset, to, amount)
+    case PRIV_ID_BATCH:
+        switch (itemIdx) {
+            case 0:
+                return STR_IT_calls;
+            default:
+                return NULL;
+        }
+    case PRIV_ID_TRANSFER: // EqBalances:transfer(asset, to, amount)
         switch (itemIdx) {
             case 0:
                 return STR_IT_asset;
@@ -208,8 +302,8 @@ const char* _getMethod_ItemName_V1(uint8_t moduleIdx, uint8_t callIdx, uint8_t i
             default:
                 return NULL;
         }
-    case 6144: /* module 24 call 0 */ // Subaccounts:transfer_to_subaccount  (SubAccType, Asset, amount)
-    case 6145: /* module 24 call 1 */ // Subaccounts:transfer_from_subaccount(SubAccType, Asset, amount)
+    case PRIV_ID_TRANSFER_TO_SUBACC:  // Subaccounts:transfer_to_subaccount  (SubAccType, Asset, amount)
+    case PRIV_ID_TRANSFER_FROM_SUBACC: // Subaccounts:transfer_from_subaccount(SubAccType, Asset, amount)
         switch (itemIdx) {
             case 0:
                 return STR_IT_subaccount;
@@ -220,7 +314,7 @@ const char* _getMethod_ItemName_V1(uint8_t moduleIdx, uint8_t callIdx, uint8_t i
             default:
                 return NULL;
         }
-    case 6912: /* module 27 call 0 */ // EqBridge:transfer_native(amount, recipient, chainId, resourceId)
+    case PRIV_ID_BRIDGE_TRANSFER_NATIVE: // EqBridge:transfer_native(amount, recipient, chainId, resourceId)
         switch (itemIdx) {
         case 0:
             return STR_IT_amount;
@@ -233,9 +327,25 @@ const char* _getMethod_ItemName_V1(uint8_t moduleIdx, uint8_t callIdx, uint8_t i
         default:
             return NULL;
         }
+    case PRIV_ID_CURVE_EXCHANGE: // CurveAmm:exchange
+        switch (itemIdx) {
+        case 0:
+            return STR_IT_poolId;
+        case 1:
+            return STR_IT_poolTokenId_send;
+        case 2:
+            return STR_IT_poolTokenId_receive;
+        case 3:
+            return STR_IT_dx;
+        case 4:
+            return STR_IT_min_dy;
+        default:
+            return NULL;
+        }
     default:
         return NULL;
     }
+
 
     return NULL;
 }
@@ -249,50 +359,60 @@ parser_error_t _getMethod_ItemValue_V1(
     uint16_t callPrivIdx = ((uint16_t)moduleIdx << 8u) + callIdx;
 
     switch (callPrivIdx) {
-        case 3328: /* module 9 -> 10 call 0 */ // EqBalances:transfer(asset, to, amount)
+        case PRIV_ID_BATCH:  // Utility:batch
         switch (itemIdx) {
-            case 0: /* utility_batch_V1 - calls */;
-                return _toStringAsset_V1(
-                        &m->basic.eqbalances_transfer_V1.asset,
-                        outValue, outValueLen,
-                        pageIdx, pageCount);
-            case 1:
-                return _toStringAccountId_V1(
-                        &m->basic.eqbalances_transfer_V1.to,
-                        outValue, outValueLen,
-                        pageIdx, pageCount);
-            case 2:
-                return _toStringBalanceAsset_V1(
-                        &m->basic.eqbalances_transfer_V1.amount,
-                        &m->basic.eqbalances_transfer_V1.asset,
+            case 0:
+                return _toStringVecCall(
+                        &m->basic.utility_batch_V1.calls,
                         outValue, outValueLen,
                         pageIdx, pageCount);
             default:
                 return parser_no_data;
         }
-        case 6144: /* module 24 call 0 */ // Subaccounts:transfer_to_subaccount  (SubAccType, Asset, amount)
-        case 6145: /* module 24 call 1 */ // Subaccounts:transfer_from_subaccount(SubAccType, Asset, amount)
+        case PRIV_ID_TRANSFER: // EqBalances:transfer(asset, to, amount)
+        switch (itemIdx) {
+            case 0:
+                return _toStringAsset_V1(
+                        &m->nested.eqbalances_transfer_V1.asset,
+                        outValue, outValueLen,
+                        pageIdx, pageCount);
+            case 1:
+                return _toStringAccountId_V1(
+                        &m->nested.eqbalances_transfer_V1.to,
+                        outValue, outValueLen,
+                        pageIdx, pageCount);
+            case 2:
+                return _toStringBalanceAsset_V1(
+                        &m->nested.eqbalances_transfer_V1.amount,
+                        &m->nested.eqbalances_transfer_V1.asset,
+                        outValue, outValueLen,
+                        pageIdx, pageCount);
+            default:
+                return parser_no_data;
+        }
+        case PRIV_ID_TRANSFER_TO_SUBACC: // Subaccounts:transfer_to_subaccount  (SubAccType, Asset, amount)
+        case PRIV_ID_TRANSFER_FROM_SUBACC: // Subaccounts:transfer_from_subaccount(SubAccType, Asset, amount)
             switch (itemIdx) {
-                case 0: /* utility_batch_V1 - calls */;
+                case 0:
                     return _toStringSubaccount_V1(
-                            &m->basic.subaccounts_transfer_to_subaccount_V1.subAccType,
+                            &m->nested.subaccounts_transfer_to_subaccount_V1.subAccType,
                             outValue, outValueLen,
                             pageIdx, pageCount);
                 case 1:
                     return _toStringAsset_V1(
-                            &m->basic.subaccounts_transfer_to_subaccount_V1.asset,
+                            &m->nested.subaccounts_transfer_to_subaccount_V1.asset,
                             outValue, outValueLen,
                             pageIdx, pageCount);
                 case 2:
                     return _toStringBalanceAsset_V1(
-                            &m->basic.subaccounts_transfer_to_subaccount_V1.amount,
-                            &m->basic.subaccounts_transfer_to_subaccount_V1.asset,
+                            &m->nested.subaccounts_transfer_to_subaccount_V1.amount,
+                            &m->nested.subaccounts_transfer_to_subaccount_V1.asset,
                             outValue, outValueLen,
                             pageIdx, pageCount);
                 default:
                     return parser_no_data;
             }
-        case 6912: /* module 27 call 0 */ // EqBridge:transfer_native(amount, recipient, chainId, resourceId)
+        case PRIV_ID_BRIDGE_TRANSFER_NATIVE: // EqBridge:transfer_native(amount, recipient, chainId, resourceId)
             switch (itemIdx) {
                 case 0:
                     return _toStringAmount(
@@ -317,6 +437,36 @@ parser_error_t _getMethod_ItemValue_V1(
                 default:
                     return parser_no_data;
             }
+        case PRIV_ID_CURVE_EXCHANGE: // CurveAmm:exchange
+            switch (itemIdx) {
+                case 0:
+                    return _toStringu32(
+                            &m->basic.curveAmm_exchange_V1.poolId,
+                            outValue, outValueLen,
+                            pageIdx, pageCount);
+                case 1:
+                    return _toStringu32(
+                            &m->basic.curveAmm_exchange_V1.poolTokenId_i,
+                            outValue, outValueLen,
+                            pageIdx, pageCount);
+                case 2:
+                    return _toStringu32(
+                            &m->basic.curveAmm_exchange_V1.poolTokenId_j,
+                            outValue, outValueLen,
+                            pageIdx, pageCount);
+                case 3:
+                    return _toStringAmount(
+                            &m->basic.curveAmm_exchange_V1.dx,
+                            outValue, outValueLen,
+                            pageIdx, pageCount);
+                case 4:
+                    return _toStringAmount(
+                            &m->basic.curveAmm_exchange_V1.min_dy,
+                            outValue, outValueLen,
+                            pageIdx, pageCount);
+                default:
+                    return parser_no_data;
+            }
         default:
             return parser_ok;
     }
@@ -334,13 +484,10 @@ bool _getMethod_IsNestingSupported_V1(uint8_t moduleIdx, uint8_t callIdx)
     uint16_t callPrivIdx = ((uint16_t)moduleIdx << 8u) + callIdx;
 
     switch (callPrivIdx) {
-    case 3328: // EqBalances:transfer
-    case 5632: // Vesting:vest
-    case 6144: // Subaccounts:transfer_to_subaccount
-    case 6145: // Subaccounts:transfer_from_subaccount
-    case 6912: // EqBridge:transfer_native
-        return false;
-    default:
+    case PRIV_ID_TRANSFER_TO_SUBACC:        // Subaccounts:transfer_to_subaccount
+    case PRIV_ID_TRANSFER_FROM_SUBACC:      // Subaccounts:transfer_from_subaccount
         return true;
+    default:
+        return false;
     }
 }

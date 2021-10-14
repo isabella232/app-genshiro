@@ -20,13 +20,16 @@ extern "C" {
 #endif
 
 // Modules names
+static const char* STR_MO_UTILITY = "Utility";
 static const char* STR_MO_EQBALANCES = "EqBalances";
 static const char* STR_MO_VESTING = "Vesting";
 static const char* STR_MO_SUBACCOUNTS = "Subaccounts";
 static const char* STR_MO_EQLOCKDROP = "EqLockdrop";
 static const char* STR_MO_EQBRIDGE = "EqBridge";
+static const char* STR_MO_CURVE_AMM = "CurveAmm";
 
 // Methods names
+static const char* STR_ME_BATCH = "Batch";
 static const char* STR_ME_LOCK = "Lock";
 static const char* STR_ME_UNLOCK_EXTERNAL = "Unlock external";
 static const char* STR_ME_VEST = "Vest";
@@ -34,6 +37,7 @@ static const char* STR_ME_TRANSFER = "Transfer";
 static const char* STR_ME_TRANSFER_TO_SUBACCOUNT = "Transfer to subaccount";
 static const char* STR_ME_TRANSFER_FROM_SUBACCOUNT = "Transfer from subaccount";
 static const char* STR_ME_TRANSFER_NATIVE = "Transfer native";
+static const char* STR_ME_EXCHANGE = "Exchange";
 // Items names
 static const char* STR_IT__ratio = "Ratio";
 static const char* STR_IT__remark = "Remark";
@@ -209,6 +213,13 @@ static const char* STR_IT_asset = "Asset";
 static const char* STR_IT_subaccount = "Subaccount";
 static const char* STR_IT_chain_id = "ChainId";
 static const char* STR_IT_resource_id = "ResourceId";
+
+static const char* STR_IT_poolId = "Pool Id";
+static const char* STR_IT_poolTokenId_send = "TokenId send";
+static const char* STR_IT_poolTokenId_receive = "TokenId receive";
+static const char* STR_IT_dx = "dx";
+static const char* STR_IT_min_dy = "Min dy";
 #ifdef __cplusplus
 }
 #endif
+

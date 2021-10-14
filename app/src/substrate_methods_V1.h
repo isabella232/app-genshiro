@@ -26,11 +26,12 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 
-#define PD_CALL_EQBALANCES_V1       13 // EQ Pallet
-#define PD_CALL_VESTING_V1          22 // EQ Pallet
-#define PD_CALL_SUBACCOUNTS_V1      24 // EQ Pallet
-#define PD_CALL_EQBRIDGE_V1         27 // EQ Pallet
-#define PD_CALL_EQLOCKDROP_V1       32 // EQ Pallet
+
+/// Pallet Utility
+#define PD_CALL_UTILITY_BATCH_V1 0
+typedef struct {
+    pd_VecCall_t calls;
+} pd_utility_batch_V1_t;
 
 /// Pallet EqBalances
 #define PD_CALL_EQBALANCES_TRANSFER_V1 0
@@ -79,18 +80,36 @@ typedef struct {
 typedef struct {
 } pd_eqlockdrop_unlock_external_V1_t;
 
+/// Pallet CurveAmm
+//#define PD_CALL_CURVEAMM_ADD_LIQUIDITY_V1 1
+//typedef struct {
+//    pd_Balance_t amount;
+//    pd_Bytes_t recipient;
+//    eq_ChainId_t chainId;
+//    pd_u8_array_32_V1_t resourceId;
+//} pd_curveAmm_add_liquidity_V1_t;
+
+#define PD_CALL_CURVEAMM_EXCHANGE_V1 1
+typedef struct {
+    pd_u32_t poolId;
+    pd_u32_t poolTokenId_i;
+    pd_u32_t poolTokenId_j;
+    pd_Balance_t dx;
+    pd_Balance_t min_dy;
+} pd_curveAmm_exchange_V1_t;
+
 typedef union {
-    pd_eqlockdrop_lock_V1_t eqlockdrop_lock_V1;
-    pd_eqlockdrop_unlock_external_V1_t eqlockdrop_unlock_external_V1;
+    pd_utility_batch_V1_t utility_batch_V1;
     pd_vesting_vest_V1_t vesting_vest_V1;
-    pd_eqbalances_transfer_V1_t eqbalances_transfer_V1;
-    pd_subaccounts_transfer_to_subaccount_V1_t subaccounts_transfer_to_subaccount_V1;
-    pd_subaccounts_transfer_from_subaccount_V1_t subaccounts_transfer_from_subaccount_V1;
     pd_eqbridge_transfer_native_V1_t eqbridge_transfer_native_V1;
+    pd_curveAmm_exchange_V1_t curveAmm_exchange_V1;
 } pd_MethodBasic_V1_t;
 
 
 typedef union {
+    pd_eqbalances_transfer_V1_t eqbalances_transfer_V1;
+    pd_subaccounts_transfer_to_subaccount_V1_t subaccounts_transfer_to_subaccount_V1;
+    pd_subaccounts_transfer_from_subaccount_V1_t subaccounts_transfer_from_subaccount_V1;
 } pd_MethodNested_V1_t;
 
 typedef union {
