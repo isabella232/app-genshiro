@@ -170,6 +170,12 @@ typedef struct {
 } pd_VecCall_t;
 
 typedef struct {
+    uint64_t _len;
+    const uint8_t* _ptr;
+    uint64_t _lenBuffer;
+} pd_VecBalance_t;
+
+typedef struct {
     compactInt_t value;
 } pd_CompactBalanceOf_t;
 

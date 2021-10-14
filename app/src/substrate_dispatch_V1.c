@@ -50,11 +50,11 @@
 #define METHOD_ID_TRANSFER_NATIVE 0
 #define PRIV_ID_BRIDGE_TRANSFER_NATIVE GET_CALL_PRIV_IDX(PALLET_ID_EQBRIDGE, METHOD_ID_TRANSFER_NATIVE)
 
-// idx: 1 name: "add_liquidity" args count: 3
-//	idx: 2 name: "exchange" args count: 5
-//	idx: 3 name: "remove_liquidity" args count: 3
-//	idx: 4 name: "remove_liquidity_imbalance" args count: 3
-//	idx: 5 name: "remove_liquidity_one_coin" args count: 4
+// idx: 1 name: "add_liquidity" args count: 3                   + (need _toStringVecBalance)
+//	idx: 2 name: "exchange" args count: 5                       +
+//	idx: 3 name: "remove_liquidity" args count: 3               + (need _toStringVecBalance)
+//	idx: 4 name: "remove_liquidity_imbalance" args count: 3     + (need _toStringVecBalance)
+//	idx: 5 name: "remove_liquidity_one_coin" args count: 4      +
 
 
 // CurveAmm pallet
@@ -127,15 +127,14 @@ __Z_INLINE parser_error_t  _readMethod_eqbridge_transfer_native_V1(
 }
 
 /// Pallet CurveAmm
-//__Z_INLINE parser_error_t  _readMethod_curveAmm_add_liquidity_V1(
-//        parser_context_t* c, pd_eqbridge_transfer_native_V1_t* m)
-//{
-//CHECK_ERROR(_readBalance(c, &m->amount))
-//CHECK_ERROR(_readBytes(c, &m->recipient))
-//CHECK_ERROR(_readChainId_V1(c, &m->chainId));
-//CHECK_ERROR(_readu8_array_32_V1(c, &m->resourceId))
-//return parser_ok;
-//}
+__Z_INLINE parser_error_t  _readMethod_curveAmm_add_liquidity_V1(
+    parser_context_t* c, pd_curveAmm_add_liquidity_V1_t* m)
+{
+    CHECK_ERROR(_readu32(c, &m->poolId))
+    CHECK_ERROR(_readVecBalance(c, &m->amounts))
+    CHECK_ERROR(_readBalance(c, &m->min_mint_amount))
+    return parser_ok;
+}
 
 __Z_INLINE parser_error_t  _readMethod_curveAmm_exchange_V1(
     parser_context_t* c, pd_curveAmm_exchange_V1_t* m)
@@ -147,6 +146,35 @@ __Z_INLINE parser_error_t  _readMethod_curveAmm_exchange_V1(
     CHECK_ERROR(_readBalance(c, &m->min_dy))
     return parser_ok;
 }
+
+__Z_INLINE parser_error_t  _readMethod_curveAmm_remove_liquidity_V1(
+    parser_context_t* c, pd_curveAmm_remove_liquidity_V1_t* m)
+{
+    CHECK_ERROR(_readu32(c, &m->poolId))
+    CHECK_ERROR(_readBalance(c, &m->amount))
+    CHECK_ERROR(_readVecBalance(c, &m->min_amounts))
+    return parser_ok;
+}
+
+__Z_INLINE parser_error_t  _readMethod_curveAmm_remove_liquidity_imbalance_V1(
+    parser_context_t* c, pd_curveAmm_remove_liquidity_imbalance_V1_t* m)
+{
+    CHECK_ERROR(_readu32(c, &m->poolId))
+    CHECK_ERROR(_readVecBalance(c, &m->amounts))
+    CHECK_ERROR(_readBalance(c, &m->max_burn_amount))
+return parser_ok;
+}
+
+__Z_INLINE parser_error_t  _readMethod_curveAmm_remove_liquidity_one_coin_V1(
+    parser_context_t* c, pd_curveAmm_remove_liquidity_one_coin_V1_t* m)
+{
+    CHECK_ERROR(_readu32(c, &m->poolId))
+    CHECK_ERROR(_readBalance(c, &m->token_amount))
+    CHECK_ERROR(_readu32(c, &m->poolTokenId))
+    CHECK_ERROR(_readBalance(c, &m->min_amount))
+    return parser_ok;
+}
+
 
 parser_error_t _readMethod_V1(
     parser_context_t* c,
@@ -186,8 +214,20 @@ parser_error_t _readMethod_V1(
             break;
 
             /// Pallet CurveAmm
+        case PRIV_ID_CURVE_ADD_LIQUIDITY:
+            CHECK_ERROR(_readMethod_curveAmm_add_liquidity_V1(c, &method->basic.curveAmm_add_liquidity_V1))
+            break;
         case PRIV_ID_CURVE_EXCHANGE:
-            CHECK_ERROR(_readMethod_curveAmm_exchange_V1(c, &method->basic.eqbridge_transfer_native_V1))
+            CHECK_ERROR(_readMethod_curveAmm_exchange_V1(c, &method->basic.curveAmm_exchange_V1))
+            break;
+        case PRIV_ID_CURVE_REMOVE_LIQUIDITY:
+            CHECK_ERROR(_readMethod_curveAmm_remove_liquidity_V1(c, &method->basic.curveAmm_remove_liquidity_V1))
+            break;
+        case PRIV_ID_CURVE_REMOVE_LIQUIDITY_IMBALANCE:
+            CHECK_ERROR(_readMethod_curveAmm_remove_liquidity_imbalance_V1(c, &method->basic.curveAmm_remove_liquidity_V1))
+            break;
+        case PRIV_ID_CURVE_REMOVE_LIQUIDITY_ONE_COIN:
+            CHECK_ERROR(_readMethod_curveAmm_remove_liquidity_one_coin_V1(c, &method->basic.curveAmm_remove_liquidity_one_coin_V1))
             break;
     default:
         return parser_not_supported;
@@ -228,23 +268,31 @@ const char* _getMethod_Name_V1(uint8_t moduleIdx, uint8_t callIdx)
     uint16_t callPrivIdx = ((uint16_t)moduleIdx << 8u) + callIdx;
 
     switch (callPrivIdx) {
-    case PRIV_ID_BATCH:
+    case PRIV_ID_BATCH:                           // Utility:batch
         return STR_ME_BATCH;
     case PRIV_ID_TRANSFER:                        // EqBalances:transfer
         return STR_ME_TRANSFER;
     case PRIV_ID_VEST:                            // Vesting:vest
         return STR_ME_VEST;
 
-    case PRIV_ID_TRANSFER_TO_SUBACC:
-        return STR_ME_TRANSFER_TO_SUBACCOUNT;     // Subaccounts:transfer_to_subaccount
-    case PRIV_ID_TRANSFER_FROM_SUBACC:
-        return STR_ME_TRANSFER_FROM_SUBACCOUNT;   // Subaccounts:transfer_from_subaccount
+    case PRIV_ID_TRANSFER_TO_SUBACC:              // Subaccounts:transfer_to_subaccount
+        return STR_ME_TRANSFER_TO_SUBACCOUNT;
+    case PRIV_ID_TRANSFER_FROM_SUBACC:            // Subaccounts:transfer_from_subaccount
+        return STR_ME_TRANSFER_FROM_SUBACCOUNT;
 
-    case PRIV_ID_BRIDGE_TRANSFER_NATIVE:
-        return STR_ME_TRANSFER_NATIVE;            // EqBridge:transfer_native
+    case PRIV_ID_BRIDGE_TRANSFER_NATIVE:          // EqBridge:transfer_native
+        return STR_ME_TRANSFER_NATIVE;
 
+    case PRIV_ID_CURVE_ADD_LIQUIDITY:             // CurveAmm:add_liquidity
+        return STR_ME_EXCHANGE;
     case PRIV_ID_CURVE_EXCHANGE:                  // CurveAmm:exchange
         return STR_ME_EXCHANGE;
+    case PRIV_ID_CURVE_REMOVE_LIQUIDITY:          // CurveAmm:remove_liquidity
+        return STR_ME_REMOVE_LIQUIDITY;
+    case PRIV_ID_CURVE_REMOVE_LIQUIDITY_IMBALANCE:// CurveAmm:remove_liquidity_imbalance
+        return STR_ME_REMOVE_LIQUIDITY_IMBALANCE;
+    case PRIV_ID_CURVE_REMOVE_LIQUIDITY_ONE_COIN: // CurveAmm:remove_liquidity_one_coin
+        return STR_ME_REMOVE_LIQUIDITY_ONE_COIN;
 
     default:
         return NULL;
@@ -258,20 +306,28 @@ uint8_t _getMethod_NumItems_V1(uint8_t moduleIdx, uint8_t callIdx)
     uint16_t callPrivIdx = ((uint16_t)moduleIdx << 8u) + callIdx;
 
     switch (callPrivIdx) {
-    case PRIV_ID_BATCH:                     // Utility:batch
+    case PRIV_ID_BATCH:                             // Utility:batch
         return 1;
-    case PRIV_ID_TRANSFER:                  // EqBalances:transfer
+    case PRIV_ID_TRANSFER:                          // EqBalances:transfer
         return 3;
-    case PRIV_ID_VEST:                      // Vesting:vest
+    case PRIV_ID_VEST:                              // Vesting:vest
         return 0;
-    case PRIV_ID_TRANSFER_TO_SUBACC:        // Subaccounts:transfer_to_subaccount
+    case PRIV_ID_TRANSFER_TO_SUBACC:                // Subaccounts:transfer_to_subaccount
         return 3;
-    case PRIV_ID_TRANSFER_FROM_SUBACC:      // Subaccounts:transfer_from_subaccount
+    case PRIV_ID_TRANSFER_FROM_SUBACC:              // Subaccounts:transfer_from_subaccount
         return 3;
-    case PRIV_ID_BRIDGE_TRANSFER_NATIVE:    // EqBridge:transfer_native
+    case PRIV_ID_BRIDGE_TRANSFER_NATIVE:            // EqBridge:transfer_native
         return 4;
-    case PRIV_ID_CURVE_EXCHANGE:            // CurveAmm:exchange
+    case PRIV_ID_CURVE_ADD_LIQUIDITY:               // CurveAmm:exchange
+        return 3;
+    case PRIV_ID_CURVE_EXCHANGE:                    // CurveAmm:exchange
         return 5;
+    case PRIV_ID_CURVE_REMOVE_LIQUIDITY:            // CurveAmm:remove_liquidity
+        return 3;
+    case PRIV_ID_CURVE_REMOVE_LIQUIDITY_IMBALANCE:  // CurveAmm:remove_liquidity_imbalance
+        return 3;
+    case PRIV_ID_CURVE_REMOVE_LIQUIDITY_ONE_COIN:   // CurveAmm:remove_liquidity_one_coin
+        return 4;
     default:
         return 0;
     }
@@ -327,6 +383,17 @@ const char* _getMethod_ItemName_V1(uint8_t moduleIdx, uint8_t callIdx, uint8_t i
         default:
             return NULL;
         }
+    case PRIV_ID_CURVE_ADD_LIQUIDITY: // CurveAmm:add_liquidity
+        switch (itemIdx) {
+        case 0:
+            return STR_IT_poolId;
+        case 1:
+            return STR_IT_amounts;
+        case 2:
+            return STR_IT_min_mint_amount;
+        default:
+            return NULL;
+        }
     case PRIV_ID_CURVE_EXCHANGE: // CurveAmm:exchange
         switch (itemIdx) {
         case 0:
@@ -339,6 +406,41 @@ const char* _getMethod_ItemName_V1(uint8_t moduleIdx, uint8_t callIdx, uint8_t i
             return STR_IT_dx;
         case 4:
             return STR_IT_min_dy;
+        default:
+            return NULL;
+        }
+    case PRIV_ID_CURVE_REMOVE_LIQUIDITY:            // CurveAmm:remove_liquidity
+        switch (itemIdx) {
+        case 0:
+            return STR_IT_poolId;
+        case 1:
+            return STR_IT_value;
+        case 2:
+            return STR_IT_min_amounts;
+        default:
+            return NULL;
+        }
+    case PRIV_ID_CURVE_REMOVE_LIQUIDITY_IMBALANCE:  // CurveAmm:remove_liquidity_imbalance
+        switch (itemIdx) {
+        case 0:
+            return STR_IT_poolId;
+        case 1:
+            return STR_IT_amounts;
+        case 2:
+            return STR_IT_max_burn_amount;
+        default:
+            return NULL;
+        }
+    case PRIV_ID_CURVE_REMOVE_LIQUIDITY_ONE_COIN: // CurveAmm:remove_liquidity_one_coin
+        switch (itemIdx) {
+        case 0:
+            return STR_IT_poolId;
+        case 1:
+            return STR_IT_value;
+        case 2:
+            return STR_IT_poolTokenId;
+        case 3:
+            return STR_IT_min_amount;
         default:
             return NULL;
         }
@@ -437,6 +539,26 @@ parser_error_t _getMethod_ItemValue_V1(
                 default:
                     return parser_no_data;
             }
+        case PRIV_ID_CURVE_ADD_LIQUIDITY: // CurveAmm:add_liquidity
+            switch (itemIdx) {
+                case 0:
+                    return _toStringu32(
+                            &m->basic.curveAmm_add_liquidity_V1.poolId,
+                            outValue, outValueLen,
+                            pageIdx, pageCount);
+                case 1:
+                    return _toStringVecBalance(
+                            &m->basic.curveAmm_add_liquidity_V1.amounts,
+                            outValue, outValueLen,
+                            pageIdx, pageCount);
+                case 2:
+                    return _toStringAmount(
+                            &m->basic.curveAmm_add_liquidity_V1.min_mint_amount,
+                            outValue, outValueLen,
+                            pageIdx, pageCount);
+                default:
+                    return parser_no_data;
+            }
         case PRIV_ID_CURVE_EXCHANGE: // CurveAmm:exchange
             switch (itemIdx) {
                 case 0:
@@ -464,6 +586,72 @@ parser_error_t _getMethod_ItemValue_V1(
                             &m->basic.curveAmm_exchange_V1.min_dy,
                             outValue, outValueLen,
                             pageIdx, pageCount);
+                default:
+                    return parser_no_data;
+            }
+        case PRIV_ID_CURVE_REMOVE_LIQUIDITY:            // CurveAmm:remove_liquidity
+            switch (itemIdx) {
+                case 0:
+                    return _toStringu32(
+                            &m->basic.curveAmm_remove_liquidity_V1.poolId,
+                            outValue, outValueLen,
+                            pageIdx, pageCount);
+                case 1:
+                    return _toStringAmount(
+                            &m->basic.curveAmm_remove_liquidity_V1.amount,
+                            outValue, outValueLen,
+                            pageIdx, pageCount);
+                case 2:
+                    return  _toStringVecBalance(
+                            &m->basic.curveAmm_remove_liquidity_V1.min_amounts,
+                            outValue, outValueLen,
+                            pageIdx, pageCount);
+                default:
+                    return parser_no_data;
+            }
+        case PRIV_ID_CURVE_REMOVE_LIQUIDITY_IMBALANCE:  // CurveAmm:remove_liquidity_imbalance
+            switch (itemIdx) {
+                case 0:
+                    return _toStringu32(
+                            &m->basic.curveAmm_remove_liquidity_imbalance_V1.poolId,
+                            outValue, outValueLen,
+                            pageIdx, pageCount);
+                case 1:
+                    return _toStringVecBalance(
+                            &m->basic.curveAmm_remove_liquidity_imbalance_V1.amounts,
+                            outValue, outValueLen,
+                            pageIdx, pageCount);
+                case 2:
+                    return  _toStringAmount(
+                            &m->basic.curveAmm_remove_liquidity_imbalance_V1.max_burn_amount,
+                            outValue, outValueLen,
+                            pageIdx, pageCount);
+                default:
+                    return parser_no_data;
+            }
+        case PRIV_ID_CURVE_REMOVE_LIQUIDITY_ONE_COIN: // CurveAmm:remove_liquidity_one_coin
+            switch (itemIdx) {
+                case 0:
+                    return _toStringu32(
+                            &m->basic.curveAmm_remove_liquidity_one_coin_V1.poolId,
+                            outValue, outValueLen,
+                            pageIdx, pageCount);
+                case 1:
+                    return _toStringAmount(
+                            &m->basic.curveAmm_remove_liquidity_one_coin_V1.token_amount,
+                            outValue, outValueLen,
+                            pageIdx, pageCount);
+                case 2:
+                    return _toStringu32(
+                            &m->basic.curveAmm_remove_liquidity_one_coin_V1.poolTokenId,
+                            outValue, outValueLen,
+                            pageIdx, pageCount);
+                case 3:
+                    return _toStringAmount(
+                            &m->basic.curveAmm_remove_liquidity_one_coin_V1.min_amount,
+                            outValue, outValueLen,
+                            pageIdx, pageCount);
+
                 default:
                     return parser_no_data;
             }

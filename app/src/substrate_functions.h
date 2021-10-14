@@ -53,6 +53,7 @@ parser_error_t _readHeartbeat(parser_context_t* c, pd_Heartbeat_t* v);
 parser_error_t _readOptionu32(parser_context_t* c, pd_Optionu32_t* v);
 parser_error_t _readVecHeader(parser_context_t* c, pd_VecHeader_t* v);
 parser_error_t _readVecu32(parser_context_t* c, pd_Vecu32_t* v);
+parser_error_t _readVecBalance(parser_context_t* c, pd_VecBalance_t* v);
 
 // Common toString functions
 
@@ -195,6 +196,13 @@ parser_error_t _toStringVecCall(
     uint16_t outValueLen,
     uint8_t pageIdx,
     uint8_t* pageCount);
+
+parser_error_t _toStringVecBalance(
+        const pd_VecBalance_t* v,
+        char* outValue,
+        uint16_t outValueLen,
+        uint8_t pageIdx,
+        uint8_t* pageCount);
 
 parser_error_t _toStringCompactBalanceOf(
     const pd_CompactBalanceOf_t* v,

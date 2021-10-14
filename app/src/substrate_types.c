@@ -265,6 +265,10 @@ parser_error_t _readVecu32(parser_context_t* c, pd_Vecu32_t* v) {
     GEN_DEF_READVECTOR(u32)
 }
 
+parser_error_t _readVecBalance(parser_context_t* c, pd_VecBalance_t* v) {
+    GEN_DEF_READVECTOR(VecBalance)
+}
+
 parser_error_t _readOptionu8_array_20(parser_context_t* c, pd_Optionu8_array_20_t* v)
 {
     CHECK_ERROR(_readUInt8(c, &v->some))
@@ -751,6 +755,16 @@ parser_error_t _toStringVecCall(
     }
 
     return parser_print_not_supported;
+}
+
+parser_error_t _toStringVecBalance(
+        const pd_VecBalance_t* v,
+        char* outValue,
+        uint16_t outValueLen,
+        uint8_t pageIdx,
+        uint8_t* pageCount)
+{
+    // TODO !!
 }
 
 parser_error_t _toStringCompactBalanceOf(

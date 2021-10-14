@@ -81,13 +81,12 @@ typedef struct {
 } pd_eqlockdrop_unlock_external_V1_t;
 
 /// Pallet CurveAmm
-//#define PD_CALL_CURVEAMM_ADD_LIQUIDITY_V1 1
-//typedef struct {
-//    pd_Balance_t amount;
-//    pd_Bytes_t recipient;
-//    eq_ChainId_t chainId;
-//    pd_u8_array_32_V1_t resourceId;
-//} pd_curveAmm_add_liquidity_V1_t;
+#define PD_CALL_CURVEAMM_ADD_LIQUIDITY_V1 1
+typedef struct {
+    pd_u32_t poolId;
+    pd_VecBalance_t amounts;
+    pd_Balance_t min_mint_amount;
+} pd_curveAmm_add_liquidity_V1_t;
 
 #define PD_CALL_CURVEAMM_EXCHANGE_V1 1
 typedef struct {
@@ -98,11 +97,37 @@ typedef struct {
     pd_Balance_t min_dy;
 } pd_curveAmm_exchange_V1_t;
 
+#define PD_CALL_CURVEAMM_REMOVE_LIQUIDITY_V1 1
+typedef struct {
+    pd_u32_t poolId;
+    pd_Balance_t amount;
+    pd_VecBalance_t min_amounts;
+} pd_curveAmm_remove_liquidity_V1_t;
+
+#define PD_CALL_CURVEAMM_REMOVE_LIQUIDITY_IMBALANCE_V1 1
+typedef struct {
+    pd_u32_t poolId;
+    pd_VecBalance_t amounts;
+    pd_Balance_t max_burn_amount;
+} pd_curveAmm_remove_liquidity_imbalance_V1_t;
+
+#define PD_CALL_CURVEAMM_REMOVE_LIQUIDITY_ONE_COIN_V1 1
+typedef struct {
+    pd_u32_t poolId;
+    pd_Balance_t token_amount;
+    pd_u32_t poolTokenId;
+    pd_Balance_t min_amount;
+} pd_curveAmm_remove_liquidity_one_coin_V1_t;
+
 typedef union {
     pd_utility_batch_V1_t utility_batch_V1;
     pd_vesting_vest_V1_t vesting_vest_V1;
     pd_eqbridge_transfer_native_V1_t eqbridge_transfer_native_V1;
+    pd_curveAmm_add_liquidity_V1_t curveAmm_add_liquidity_V1;
     pd_curveAmm_exchange_V1_t curveAmm_exchange_V1;
+    pd_curveAmm_remove_liquidity_V1_t curveAmm_remove_liquidity_V1;
+    pd_curveAmm_remove_liquidity_imbalance_V1_t curveAmm_remove_liquidity_imbalance_V1;
+    pd_curveAmm_remove_liquidity_one_coin_V1_t curveAmm_remove_liquidity_one_coin_V1;
 } pd_MethodBasic_V1_t;
 
 

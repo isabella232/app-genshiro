@@ -37,7 +37,11 @@ static const char* STR_ME_TRANSFER = "Transfer";
 static const char* STR_ME_TRANSFER_TO_SUBACCOUNT = "Transfer to subaccount";
 static const char* STR_ME_TRANSFER_FROM_SUBACCOUNT = "Transfer from subaccount";
 static const char* STR_ME_TRANSFER_NATIVE = "Transfer native";
+static const char* STR_ME_ADD_LIQUIDITY = "Add liquidity";
 static const char* STR_ME_EXCHANGE = "Exchange";
+static const char* STR_ME_REMOVE_LIQUIDITY = "Remove liquidity";
+static const char* STR_ME_REMOVE_LIQUIDITY_IMBALANCE = "Remove liquidity imbalance";
+static const char* STR_ME_REMOVE_LIQUIDITY_ONE_COIN = "Remove liquidity one coin";
 // Items names
 static const char* STR_IT__ratio = "Ratio";
 static const char* STR_IT__remark = "Remark";
@@ -215,10 +219,16 @@ static const char* STR_IT_chain_id = "ChainId";
 static const char* STR_IT_resource_id = "ResourceId";
 
 static const char* STR_IT_poolId = "Pool Id";
+static const char* STR_IT_poolTokenId = "TokenId";
 static const char* STR_IT_poolTokenId_send = "TokenId send";
 static const char* STR_IT_poolTokenId_receive = "TokenId receive";
 static const char* STR_IT_dx = "dx";
 static const char* STR_IT_min_dy = "Min dy";
+static const char* STR_IT_min_amount = "Min amount";
+static const char* STR_IT_min_amounts = "Min amounts";
+static const char* STR_IT_min_mint_amount = "Min mint amount";
+static const char* STR_IT_max_burn_amount = "Max burn amount";
+static const char* STR_IT_amounts = "Amounts";
 #ifdef __cplusplus
 }
 #endif
