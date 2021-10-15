@@ -266,7 +266,7 @@ parser_error_t _readVecu32(parser_context_t* c, pd_Vecu32_t* v) {
 }
 
 parser_error_t _readVecBalance(parser_context_t* c, pd_VecBalance_t* v) {
-    GEN_DEF_READVECTOR(VecBalance)
+    GEN_DEF_READVECTOR(Balance)
 }
 
 parser_error_t _readOptionu8_array_20(parser_context_t* c, pd_Optionu8_array_20_t* v)
@@ -764,6 +764,42 @@ parser_error_t _toStringVecBalance(
         uint8_t pageIdx,
         uint8_t* pageCount)
 {
+    CLEAN_AND_CHECK()
+
+    /* count number of pages, then output specific */
+    *pageCount = 0;
+    pd_Balance_t tmp;
+    parser_context_t ctx;
+    uint8_t chunkPageCount;
+    uint16_t currentPage, currentTotalPage = 0;
+    if(v->_len == 0) {
+        *pageCount = 1;
+        snprintf(outValue, outValueLen, "<Empty>");
+        return parser_ok;
+    }
+    /* We need to do it twice because there is no memory to keep intermediate results*/
+    /* First count*/
+    parser_init(&ctx, v->_ptr, v->_lenBuffer);
+    for (uint16_t i = 0; i < v->_len; i++) {
+        CHECK_ERROR(_readBalance(&ctx, &tmp));
+        CHECK_ERROR(_toStringAmount(&tmp, outValue, outValueLen, 0, &chunkPageCount));
+        (*pageCount)+=chunkPageCount;
+    }
+    /* Then iterate until we can print the corresponding chunk*/
+    parser_init(&ctx, v->_ptr, v->_lenBuffer);
+    for (uint16_t i = 0; i < v->_len; i++) {
+        CHECK_ERROR(_readBalance(&ctx, &tmp));
+        chunkPageCount = 1;
+        currentPage = 0;
+        while (currentPage < chunkPageCount) {
+            CHECK_ERROR(_toStringAmount(&tmp, outValue, outValueLen, currentPage, &chunkPageCount));
+            if (currentTotalPage == pageIdx) { return parser_ok; }
+            currentPage++;
+            currentTotalPage++;
+        }
+    };
+    return parser_print_not_supported;
+
     // TODO !!
 }
 

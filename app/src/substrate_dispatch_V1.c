@@ -50,12 +50,6 @@
 #define METHOD_ID_TRANSFER_NATIVE 0
 #define PRIV_ID_BRIDGE_TRANSFER_NATIVE GET_CALL_PRIV_IDX(PALLET_ID_EQBRIDGE, METHOD_ID_TRANSFER_NATIVE)
 
-// idx: 1 name: "add_liquidity" args count: 3                   + (need _toStringVecBalance)
-//	idx: 2 name: "exchange" args count: 5                       +
-//	idx: 3 name: "remove_liquidity" args count: 3               + (need _toStringVecBalance)
-//	idx: 4 name: "remove_liquidity_imbalance" args count: 3     + (need _toStringVecBalance)
-//	idx: 5 name: "remove_liquidity_one_coin" args count: 4      +
-
 
 // CurveAmm pallet
 #define METHOD_ID_ADD_LIQUIDITY                 1
@@ -210,7 +204,7 @@ parser_error_t _readMethod_V1(
 
             /// Pallet EqBridge
         case PRIV_ID_BRIDGE_TRANSFER_NATIVE:
-            CHECK_ERROR(_readMethod_eqbridge_transfer_native_V1(c, &method->basic.curveAmm_exchange_V1))
+            CHECK_ERROR(_readMethod_eqbridge_transfer_native_V1(c, &method->basic.eqbridge_transfer_native_V1))
             break;
 
             /// Pallet CurveAmm
@@ -224,7 +218,7 @@ parser_error_t _readMethod_V1(
             CHECK_ERROR(_readMethod_curveAmm_remove_liquidity_V1(c, &method->basic.curveAmm_remove_liquidity_V1))
             break;
         case PRIV_ID_CURVE_REMOVE_LIQUIDITY_IMBALANCE:
-            CHECK_ERROR(_readMethod_curveAmm_remove_liquidity_imbalance_V1(c, &method->basic.curveAmm_remove_liquidity_V1))
+            CHECK_ERROR(_readMethod_curveAmm_remove_liquidity_imbalance_V1(c, &method->basic.curveAmm_remove_liquidity_imbalance_V1))
             break;
         case PRIV_ID_CURVE_REMOVE_LIQUIDITY_ONE_COIN:
             CHECK_ERROR(_readMethod_curveAmm_remove_liquidity_one_coin_V1(c, &method->basic.curveAmm_remove_liquidity_one_coin_V1))
@@ -284,7 +278,7 @@ const char* _getMethod_Name_V1(uint8_t moduleIdx, uint8_t callIdx)
         return STR_ME_TRANSFER_NATIVE;
 
     case PRIV_ID_CURVE_ADD_LIQUIDITY:             // CurveAmm:add_liquidity
-        return STR_ME_EXCHANGE;
+        return STR_ME_ADD_LIQUIDITY;
     case PRIV_ID_CURVE_EXCHANGE:                  // CurveAmm:exchange
         return STR_ME_EXCHANGE;
     case PRIV_ID_CURVE_REMOVE_LIQUIDITY:          // CurveAmm:remove_liquidity
