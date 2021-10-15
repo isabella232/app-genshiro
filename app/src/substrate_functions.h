@@ -106,6 +106,34 @@ parser_error_t _toStringCompactu32(
     uint8_t pageIdx,
     uint8_t* pageCount);
 
+parser_error_t _toStringOrderType(
+    const pd_OrderType_t* v,
+    char* outValue,
+    uint16_t outValueLen,
+    uint8_t pageIdx,
+    uint8_t* pageCount);
+
+parser_error_t _toStringSide(
+    const pd_u8_t* v,
+    char* outValue,
+    uint16_t outValueLen,
+    uint8_t pageIdx,
+    uint8_t* pageCount);
+
+parser_error_t _toStringFixedU128(
+    const pd_FixedU128_t* v,
+    char* outValue,
+    uint16_t outValueLen,
+    uint8_t pageIdx,
+    uint8_t* pageCount);
+
+parser_error_t _toStringFixedI64(
+    const pd_FixedI64_t* v,
+    char* outValue,
+    uint16_t outValueLen,
+    uint8_t pageIdx,
+    uint8_t* pageCount);
+
 parser_error_t _toStringBalance(
     const pd_Balance_t* v,
     char* outValue,
@@ -114,11 +142,11 @@ parser_error_t _toStringBalance(
     uint8_t* pageCount);
 
 parser_error_t _toStringAmount(
-        const pd_Balance_t* v,
-        char* outValue,
-        uint16_t outValueLen,
-        uint8_t pageIdx,
-        uint8_t* pageCount);
+    const pd_Balance_t* v,
+    char* outValue,
+    uint16_t outValueLen,
+    uint8_t pageIdx,
+    uint8_t* pageCount);
 
 parser_error_t _toStringData(
     const pd_Data_t* v,

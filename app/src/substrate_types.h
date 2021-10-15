@@ -36,6 +36,7 @@ typedef uint8_t pd_u8_t;
 typedef uint16_t pd_u16_t;
 typedef uint32_t pd_u32_t;
 typedef uint64_t pd_u64_t;
+typedef  int64_t pd_i64_t;
 typedef uint64_t pd_BlockNumber_t;
 
 #define CHECK_ERROR(FUNC_CALL)          \
@@ -72,6 +73,17 @@ enum ChainId {
 };
 
 typedef enum ChainId eq_ChainId_t;
+
+
+typedef int64_t  pd_FixedI64_t;
+typedef uint8_t pd_FixedU128_t[16];
+typedef uint8_t pd_FixedI128_t[16];
+
+
+typedef struct {
+    uint8_t type;
+    pd_FixedI64_t limit;
+} pd_OrderType_t;
 
 typedef struct {
     uint8_t moduleIdx;

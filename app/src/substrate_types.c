@@ -393,6 +393,52 @@ parser_error_t _toStringCompactu32(
     return _toStringCompactInt(v, 0, 0, "", outValue, outValueLen, pageIdx, pageCount);
 }
 
+parser_error_t _toStringOrderType(
+    const pd_OrderType_t* v,
+    char* outValue,
+    uint16_t outValueLen,
+    uint8_t pageIdx,
+    uint8_t* pageCount)
+{
+
+    // TODO
+    return parser_ok;
+}
+
+parser_error_t _toStringSide(
+    const pd_u8_t* v,
+    char* outValue,
+    uint16_t outValueLen,
+    uint8_t pageIdx,
+    uint8_t* pageCount)
+{
+
+    // TODO
+    return parser_ok;
+}
+parser_error_t _toStringFixedU128(
+    const pd_FixedU128_t* v,
+    char* outValue,
+    uint16_t outValueLen,
+    uint8_t pageIdx,
+    uint8_t* pageCount)
+{
+
+    // TODO
+    return parser_ok;
+}
+
+parser_error_t _toStringFixedI64(
+    const pd_FixedI64_t* v,
+    char* outValue,
+    uint16_t outValueLen,
+    uint8_t pageIdx,
+    uint8_t* pageCount)
+{
+
+    // TODO
+    return parser_ok;
+}
 ///////////////////////////////////
 ///////////////////////////////////
 ///////////////////////////////////

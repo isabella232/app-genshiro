@@ -183,6 +183,12 @@ parser_error_t _toStringCompactInt(const compactInt_t *c, uint8_t decimalPlaces,
                                    char *outValue, uint16_t outValueLen,
                                    uint8_t pageIdx, uint8_t *pageCount);
 
+parser_error_t _toStringCompactInt(const compactInt_t *c, uint8_t decimalPlaces,
+                                   char postfix,
+                                   char prefix[],
+                                   char *outValue, uint16_t outValueLen,
+                                   uint8_t pageIdx, uint8_t *pageCount);
+
 parser_error_t _toStringCompactIndex(const pd_CompactIndex_t *v,
                                      char *outValue, uint16_t outValueLen,
                                      uint8_t pageIdx, uint8_t *pageCount);

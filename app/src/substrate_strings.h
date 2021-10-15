@@ -27,6 +27,9 @@ static const char* STR_MO_SUBACCOUNTS = "Subaccounts";
 static const char* STR_MO_EQLOCKDROP = "EqLockdrop";
 static const char* STR_MO_EQBRIDGE = "EqBridge";
 static const char* STR_MO_CURVE_AMM = "CurveAmm";
+static const char* STR_MO_GENSOPTOUT = "GensOptOut";
+static const char* STR_MO_EQDEX = "EqDex";
+
 
 // Methods names
 static const char* STR_ME_BATCH = "Batch";
@@ -42,6 +45,12 @@ static const char* STR_ME_EXCHANGE = "Exchange";
 static const char* STR_ME_REMOVE_LIQUIDITY = "Remove liquidity";
 static const char* STR_ME_REMOVE_LIQUIDITY_IMBALANCE = "Remove liquidity imbalance";
 static const char* STR_ME_REMOVE_LIQUIDITY_ONE_COIN = "Remove liquidity one coin";
+static const char* STR_ME_SELL = "Sell";
+static const char* STR_ME_DISTRIBUTE_EXTERNAL = "Distribute external";
+static const char* STR_ME_BUY = "Buy";
+static const char* STR_ME_CREATE_ORDER = "Create order";
+static const char* STR_ME_DELETE_ORDER_EXTERNAL = "Delete order external";
+
 // Items names
 static const char* STR_IT__ratio = "Ratio";
 static const char* STR_IT__remark = "Remark";
@@ -229,6 +238,12 @@ static const char* STR_IT_min_amounts = "Min amounts";
 static const char* STR_IT_min_mint_amount = "Min mint amount";
 static const char* STR_IT_max_burn_amount = "Max burn amount";
 static const char* STR_IT_amounts = "Amounts";
+static const char* STR_IT_block = "Block Number";
+static const char* STR_IT_order_type = "Order type";
+static const char* STR_IT_side = "Side";
+static const char* STR_IT_expiration_time = "Expiration time";
+static const char* STR_IT_order_id = "OrderId";
+static const char* STR_IT_price = "Price";
 #ifdef __cplusplus
 }
 #endif
