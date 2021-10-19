@@ -214,14 +214,20 @@ __Z_INLINE parser_error_t  _readMethod_gensOptOut_buy_V1(
 __Z_INLINE parser_error_t  _readMethod_eqDex_create_order_V1(
     parser_context_t* c, pd_eqDex_create_order_V1_t* m)
 {
-    // TODO
+    CHECK_ERROR(_readAsset(c, &m->asset))
+    CHECK_ERROR(_readOrderType(c, &m->order_type))
+    CHECK_ERROR(_readu8(c, &m->side))
+    CHECK_ERROR(_readFixedU128(c, &m->amount))
+    CHECK_ERROR(_readu64(c, &m->expiration_time))
     return parser_ok;
 }
 
 __Z_INLINE parser_error_t  _readMethod_eqDex_delete_order_external_V1(
     parser_context_t* c, pd_eqDex_delete_order_external_V1_t* m)
 {
-    // TODO
+    CHECK_ERROR(_readAsset(c, &m->asset))
+    CHECK_ERROR(_readu64(c, &m->order_id))
+    CHECK_ERROR(_readFixedI64(c, &m->price))
     return parser_ok;
 }
 

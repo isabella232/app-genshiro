@@ -76,6 +76,7 @@ typedef enum ChainId eq_ChainId_t;
 
 
 typedef int64_t  pd_FixedI64_t;
+typedef uint64_t pd_FixedU64_t;
 typedef uint8_t pd_FixedU128_t[16];
 typedef uint8_t pd_FixedI128_t[16];
 

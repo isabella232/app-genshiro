@@ -17,12 +17,14 @@
 #include "bignum.h"
 #include "coin.h"
 #include "parser_impl.h"
+#include "dex.h"
 
 #include "substrate_dispatch.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <zbuffer.h>
 #include <zxmacros.h>
+#include <string.h>
 
 parser_error_t _readbool(parser_context_t* c, pd_bool_t* v)
 {
@@ -47,6 +49,35 @@ parser_error_t _readu32(parser_context_t* c, pd_u32_t* v)
 parser_error_t _readu64(parser_context_t* c, pd_u64_t* v)
 {
     return _readUInt64(c, v);
+}
+
+parser_error_t _readFixedU64(parser_context_t* c, pd_FixedU64_t* v)
+{
+    return _readUInt64(c, (uint64_t *)v);
+}
+
+parser_error_t _readFixedI64(parser_context_t* c, pd_FixedI64_t* v)
+{
+    pd_u64_t val = 0;
+    parser_error_t err = _readUInt64(c, &val);
+    if (err != parser_ok) {
+        return err;
+    }
+    memcpy(v, &val, 8);
+    return parser_ok;
+}
+
+parser_error_t _readFixedI128(parser_context_t* c, pd_FixedI128_t* v){
+    return _readFixedU128(c, (pd_FixedU128_t*)v);
+}
+
+parser_error_t _readFixedU128(parser_context_t* c, pd_FixedU128_t* v){
+    CHECK_INPUT();
+    MEMZERO(v, sizeof(pd_FixedU128_t));
+    const char* begin = (char*)(c->buffer + c->offset);
+    memcpy(*v, begin, 16);
+    CTX_CHECK_AND_ADVANCE(c, 16);
+    return parser_ok;
 }
 
 parser_error_t _readBlockNumber(parser_context_t* c, pd_BlockNumber_t* v)
@@ -287,6 +318,18 @@ parser_error_t _readOptionu32(parser_context_t* c, pd_Optionu32_t* v)
     return parser_ok;
 }
 
+parser_error_t _readOrderType(parser_context_t* c, pd_OrderType_t* v){
+    CHECK_INPUT()
+    parser_error_t err = _readUInt8(c, &v->type);
+    if (err != parser_ok)
+        return err;
+
+    if (v->type == DexOrder_LIMIT) {
+        return _readFixedI64(c, &v->limit);
+    }
+    return parser_ok;
+}
+
 ///////////////////////////////////
 ///////////////////////////////////
 ///////////////////////////////////
@@ -394,14 +437,33 @@ parser_error_t _toStringCompactu32(
 }
 
 parser_error_t _toStringOrderType(
-    const pd_OrderType_t* v,
-    char* outValue,
-    uint16_t outValueLen,
-    uint8_t pageIdx,
-    uint8_t* pageCount)
+        const pd_OrderType_t* v,
+        char* outValue,
+        uint16_t outValueLen,
+        uint8_t pageIdx,
+        uint8_t* pageCount)
 {
+    CLEAN_AND_CHECK()
 
-    // TODO
+    if (v->type == DexOrder_LIMIT) {
+        *pageCount = 2;
+    }
+
+    if (pageIdx == 0) {
+        char *type_name = get_order_type_name(v->type);
+        snprintf(outValue, outValueLen, "%s", type_name);
+    }
+    else if (pageIdx == 1) {
+        char bufferUI[100];
+        MEMSET(outValue, 0, outValueLen);
+        MEMSET(bufferUI, 0, sizeof(bufferUI));
+        char *err = int64_to_str(bufferUI, sizeof(bufferUI), v->limit);
+        if (err != NULL) {
+            return parser_unexpected_value;
+        }
+        intstr_to_fpstr_inplace(bufferUI, sizeof(bufferUI), 9);
+        snprintf(outValue, outValueLen, "%s", bufferUI);
+    }
     return parser_ok;
 }
 
@@ -412,10 +474,84 @@ parser_error_t _toStringSide(
     uint8_t pageIdx,
     uint8_t* pageCount)
 {
-
-    // TODO
+    CLEAN_AND_CHECK()
+    char bufferUI[100];
+    MEMSET(outValue, 0, outValueLen);
+    MEMSET(bufferUI, 0, sizeof(bufferUI));
+    const char* side_name = get_order_side_name(*v);
+    memcpy(bufferUI, side_name, strlen(side_name));
+    pageString(outValue, outValueLen, bufferUI, pageIdx, pageCount);
     return parser_ok;
 }
+
+void fixed_to_str(char *data, int dataLen, char* output, int output_len){
+    MEMSET(output, 0, output_len);
+    int dec_count = 0;
+
+    for (int i = 0; i < dataLen/2; i++){
+        char tmp = data[i];
+        data[i] = data[dataLen-i-1];
+        data[dataLen-i-1] = tmp;
+    }
+
+    for (int j = 0; j < dataLen; j++)
+    {
+
+        int carry = (data[j] >> 4) &0xF;
+        // initially holds decimal value of current hex digit;
+        // subsequently holds carry-over for multiplication
+
+        for (int i = 0; i < dec_count; ++i)
+        {
+            int val = output[i] * 16 + carry;
+            output[i] = val % 10;
+            carry = val / 10;
+        }
+
+        while (carry > 0)
+        {
+            output[dec_count] = carry % 10;
+            dec_count++;
+            carry /= 10;
+            if (dec_count >= output_len) {
+                break;
+            }
+        }
+
+        carry = data[j] & 0x0f;
+        for (int i = 0; i < dec_count; ++i)
+        {
+            int val = output[i] * 16 + carry;
+            output[i] = val % 10;
+            carry = val / 10;
+        }
+
+        while (carry > 0)
+        {
+            output[dec_count] = carry % 10;
+            dec_count++;
+            carry /= 10;
+            if (dec_count >= output_len) {
+                break;
+            }
+        }
+        if (dec_count >= output_len) {
+            break;
+        }
+    }
+    for (int i = 0; i < dec_count/2; i++){
+        char tmp = output[i] + '0';
+        output[i] = output[dec_count-i-1] + '0';
+        output[dec_count-i-1] = tmp;
+    }
+
+    if (dec_count % 2) {
+        output[dec_count/2] += '0';
+    }
+
+    output[dec_count+1] = '\0';
+}
+
 parser_error_t _toStringFixedU128(
     const pd_FixedU128_t* v,
     char* outValue,
@@ -423,8 +559,11 @@ parser_error_t _toStringFixedU128(
     uint8_t pageIdx,
     uint8_t* pageCount)
 {
-
-    // TODO
+    CLEAN_AND_CHECK()
+    char bufferUI[200];
+    fixed_to_str(*v, 16, bufferUI, sizeof(bufferUI));
+    intstr_to_fpstr_inplace(bufferUI, sizeof(bufferUI), 18);
+    pageString(outValue, outValueLen, bufferUI, pageIdx, pageCount);
     return parser_ok;
 }
 
@@ -435,10 +574,23 @@ parser_error_t _toStringFixedI64(
     uint8_t pageIdx,
     uint8_t* pageCount)
 {
+    CLEAN_AND_CHECK()
+    char bufferUI[100];
 
-    // TODO
+    char *err = int64_to_str(bufferUI, sizeof(bufferUI), *v);
+    if (err != NULL) {
+        return parser_unexpected_value;
+    }
+
+    intstr_to_fpstr_inplace(bufferUI, sizeof(bufferUI), 9);
+
+    pageString(outValue, outValueLen, bufferUI, pageIdx, pageCount);
     return parser_ok;
 }
+
+
+
+
 ///////////////////////////////////
 ///////////////////////////////////
 ///////////////////////////////////
@@ -845,8 +997,6 @@ parser_error_t _toStringVecBalance(
         }
     };
     return parser_print_not_supported;
-
-    // TODO !!
 }
 
 parser_error_t _toStringCompactBalanceOf(

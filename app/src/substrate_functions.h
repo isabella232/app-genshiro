@@ -29,6 +29,10 @@ parser_error_t _readu8(parser_context_t* c, pd_u8_t* v);
 parser_error_t _readu16(parser_context_t* c, pd_u16_t* v);
 parser_error_t _readu32(parser_context_t* c, pd_u32_t* v);
 parser_error_t _readu64(parser_context_t* c, pd_u64_t* v);
+parser_error_t _readFixedI64(parser_context_t* c, pd_FixedI64_t* v);
+parser_error_t _readFixedU64(parser_context_t* c, pd_FixedU64_t* v);
+parser_error_t _readFixedI128(parser_context_t* c, pd_FixedI128_t* v);
+parser_error_t _readFixedU128(parser_context_t* c, pd_FixedU128_t* v);
 parser_error_t _readBlockNumber(parser_context_t* c, pd_BlockNumber_t* v);
 parser_error_t _readCompactu32(parser_context_t* c, pd_Compactu32_t* v);
 parser_error_t _readCompactu64(parser_context_t* c, pd_Compactu64_t* v);
@@ -54,6 +58,8 @@ parser_error_t _readOptionu32(parser_context_t* c, pd_Optionu32_t* v);
 parser_error_t _readVecHeader(parser_context_t* c, pd_VecHeader_t* v);
 parser_error_t _readVecu32(parser_context_t* c, pd_Vecu32_t* v);
 parser_error_t _readVecBalance(parser_context_t* c, pd_VecBalance_t* v);
+parser_error_t _readOrderType(parser_context_t* c, pd_OrderType_t* v);
+
 
 // Common toString functions
 
