@@ -70,6 +70,11 @@ typedef struct {
     pd_u8_array_32_V1_t resourceId;
 } pd_eqbridge_transfer_native_V1_t;
 
+/// Pallet GensCrowdloan
+#define PD_CALL_GENS_CROWDLOAN_CLAIM_V1 0
+typedef struct {
+} pd_gensCrowdloan_claim_V1_t;
+
 /// Pallet CurveAmm
 #define PD_CALL_CURVEAMM_ADD_LIQUIDITY_V1 1
 typedef struct {
@@ -147,6 +152,7 @@ typedef union {
     pd_utility_batch_V1_t utility_batch_V1;
     pd_vesting_vest_V1_t vesting_vest_V1;
     pd_eqbridge_transfer_native_V1_t eqbridge_transfer_native_V1;
+    pd_gensCrowdloan_claim_V1_t gensCrowdloan_claim_V1;
     pd_curveAmm_add_liquidity_V1_t curveAmm_add_liquidity_V1;
     pd_curveAmm_exchange_V1_t curveAmm_exchange_V1;
     pd_curveAmm_remove_liquidity_V1_t curveAmm_remove_liquidity_V1;

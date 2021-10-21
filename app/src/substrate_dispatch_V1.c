@@ -26,8 +26,9 @@
 #define PALLET_ID_VESTING       22
 #define PALLET_ID_SUBACCOUNTS   24
 #define PALLET_ID_EQBRIDGE      27
-#define PALLET_ID_CURVE_AMM     32
+#define PALLET_ID_GENSCROWDLOAN 30
 #define PALLET_ID_GENSOPOUT     31
+#define PALLET_ID_CURVE_AMM     32
 #define PALLET_ID_EQDEX         35
 
 /// Pallet Utility
@@ -51,6 +52,10 @@
 /// Pallet EqBridge
 #define METHOD_ID_TRANSFER_NATIVE 0
 #define PRIV_ID_BRIDGE_TRANSFER_NATIVE GET_CALL_PRIV_IDX(PALLET_ID_EQBRIDGE, METHOD_ID_TRANSFER_NATIVE)
+
+/// Pallet GensCrowdloan
+#define METHOD_ID_CLAIM 0
+#define PRIV_ID_GENS_CROWD_CLAIM GET_CALL_PRIV_IDX(PALLET_ID_GENSCROWDLOAN, METHOD_ID_CLAIM)
 
 /// Pallet CurveAmm
 #define METHOD_ID_ADD_LIQUIDITY                 1
@@ -120,7 +125,7 @@ __Z_INLINE parser_error_t _readMethod_subaccounts_transfer_to_subaccount_V1(
 }
 
 __Z_INLINE parser_error_t _readMethod_subaccounts_transfer_from_subaccount_V1(
-        parser_context_t* c, pd_subaccounts_transfer_from_subaccount_V1_t* m)
+    parser_context_t* c, pd_subaccounts_transfer_from_subaccount_V1_t* m)
 {
     CHECK_ERROR(_readSubAccount_V1(c, &m->subAccType))
     CHECK_ERROR(_readAsset(c, &m->asset))
@@ -130,12 +135,19 @@ __Z_INLINE parser_error_t _readMethod_subaccounts_transfer_from_subaccount_V1(
 
 /// Pallet EqBridge
 __Z_INLINE parser_error_t  _readMethod_eqbridge_transfer_native_V1(
-        parser_context_t* c, pd_eqbridge_transfer_native_V1_t* m)
+    parser_context_t* c, pd_eqbridge_transfer_native_V1_t* m)
 {
     CHECK_ERROR(_readBalance(c, &m->amount))
     CHECK_ERROR(_readBytes(c, &m->recipient))
     CHECK_ERROR(_readChainId_V1(c, &m->chainId))
     CHECK_ERROR(_readu8_array_32_V1(c, &m->resourceId))
+    return parser_ok;
+}
+
+/// Pallet GensCrowdloan
+__Z_INLINE parser_error_t _readMethod_gensCrowdloan_claim_V1(
+    parser_context_t* c, pd_gensCrowdloan_claim_V1_t* m)
+{
     return parser_ok;
 }
 
@@ -271,6 +283,11 @@ parser_error_t _readMethod_V1(
             CHECK_ERROR(_readMethod_eqbridge_transfer_native_V1(c, &method->basic.eqbridge_transfer_native_V1))
             break;
 
+            /// Pallet EqBridge
+        case PRIV_ID_GENS_CROWD_CLAIM:
+            CHECK_ERROR(_readMethod_gensCrowdloan_claim_V1(c, &method->basic.gensCrowdloan_claim_V1))
+            break;
+
             /// Pallet CurveAmm
         case PRIV_ID_CURVE_ADD_LIQUIDITY:
             CHECK_ERROR(_readMethod_curveAmm_add_liquidity_V1(c, &method->basic.curveAmm_add_liquidity_V1))
@@ -332,6 +349,8 @@ const char* _getMethod_ModuleName_V1(uint8_t moduleIdx)
         return STR_MO_SUBACCOUNTS;
     case PALLET_ID_EQBRIDGE:
         return STR_MO_EQBRIDGE;
+    case PALLET_ID_GENSCROWDLOAN:
+        return STR_MO_GENSCROWDLOAN;
     case PALLET_ID_CURVE_AMM:
         return STR_MO_CURVE_AMM;
     case PALLET_ID_GENSOPOUT:
@@ -367,6 +386,9 @@ const char* _getMethod_Name_V1(uint8_t moduleIdx, uint8_t callIdx)
         /// Pallet EqBridge
     case PRIV_ID_BRIDGE_TRANSFER_NATIVE:          // EqBridge:transfer_native
         return STR_ME_TRANSFER_NATIVE;
+        /// Pallet GensCrowdloan
+    case PRIV_ID_GENS_CROWD_CLAIM:                // GensCrowdloan:claim
+        return STR_ME_CLAIM;
         /// Pallet CurveAmm
     case PRIV_ID_CURVE_ADD_LIQUIDITY:             // CurveAmm:add_liquidity
         return STR_ME_ADD_LIQUIDITY;
@@ -414,6 +436,8 @@ uint8_t _getMethod_NumItems_V1(uint8_t moduleIdx, uint8_t callIdx)
         return 3;
     case PRIV_ID_BRIDGE_TRANSFER_NATIVE:            // EqBridge:transfer_native
         return 4;
+    case PRIV_ID_GENS_CROWD_CLAIM:                  // GensCrowdloan:claim
+        return 0;
     case PRIV_ID_CURVE_ADD_LIQUIDITY:               // CurveAmm:exchange
         return 3;
     case PRIV_ID_CURVE_EXCHANGE:                    // CurveAmm:exchange
@@ -640,7 +664,7 @@ parser_error_t _getMethod_ItemValue_V1(
             default:
                 return parser_no_data;
         }
-        case PRIV_ID_TRANSFER_TO_SUBACC: // Subaccounts:transfer_to_subaccount  (SubAccType, Asset, amount)
+        case PRIV_ID_TRANSFER_TO_SUBACC:   // Subaccounts:transfer_to_subaccount  (SubAccType, Asset, amount)
         case PRIV_ID_TRANSFER_FROM_SUBACC: // Subaccounts:transfer_from_subaccount(SubAccType, Asset, amount)
             switch (itemIdx) {
                 case 0:
