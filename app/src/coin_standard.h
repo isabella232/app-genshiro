@@ -31,7 +31,7 @@ extern "C" {
 
 #define MENU_MAIN_APP_LINE1                 "Genshiro"
 #define MENU_MAIN_APP_LINE2                 "Ready"
-#define MENU_MAIN_APP_LINE2_SECRET          "EQ RECOVERY"
+#define MENU_MAIN_APP_LINE2_SECRET          "GENS RECOVERY"
 #define APPVERSION_LINE1                    MENU_MAIN_APP_LINE1
 #define APPVERSION_LINE2                    "v" APPVERSION
 

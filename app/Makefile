@@ -95,7 +95,7 @@ OUTPUT_INSTALLER := $(CURDIR)/pkg/installer_s.sh
 endif
 
 ifeq ($(TARGET_NAME),TARGET_NANOX)
-ICONNAME:=$(CURDIR)/nanox_gens_icon.giff
+ICONNAME:=$(CURDIR)/nanox_gens_icon.gif
 OUTPUT_ELF ?= $(CURDIR)/output/app_x.elf
 OUTPUT_INSTALLER:= $(CURDIR)/pkg/installer_x.sh
 endif

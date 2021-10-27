@@ -130,7 +130,7 @@ typedef struct {
     pd_Balance_t amount;
 } pd_gensOptOut_buy_V1_t;
 
-/// Pallet GensOptOut
+/// Pallet EqDex
 #define PD_CALL_EQDEX_CREATE_ORDER_V1 1
 typedef struct {
     eq_Asset_t asset;
