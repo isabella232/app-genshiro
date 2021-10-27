@@ -149,6 +149,10 @@ endif
 
 # X specific
 
+# Ledger: add the "Pending security review" disclaimer
+APP_LOAD_PARAMS += --tlvraw 9F:01
+DEFINES += HAVE_PENDING_REVIEW_SCREEN
+
 #Feature temporarily disabled
 DEFINES   += LEDGER_SPECIFIC
 
