@@ -230,7 +230,7 @@ dep/%.d: %.c Makefile
 .PHONY: listvariants
 listvariants:
 ifeq ($(TARGET_NAME),TARGET_NANOS)
-	@echo VARIANTS COIN EQ
+	@echo VARIANTS COIN GENS
 else ifeq ($(TARGET_NAME),TARGET_NANOX)
-	@echo VARIANTS COIN EQ
+	@echo VARIANTS COIN GENS
 endif
