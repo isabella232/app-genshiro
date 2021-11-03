@@ -62,7 +62,7 @@ $(info ************ FULL PARSER ENABLED ************)
 endif
 
 ifndef COIN
-COIN=GENS
+COIN=Genshiro
 endif
 
 include $(CURDIR)/Makefile.version
@@ -71,7 +71,7 @@ $(info COIN  = [$(COIN)])
 
 # Main app configuration
 DEFINES += APP_STANDARD
-ifeq ($(COIN),GENS)
+ifeq ($(COIN),Genshiro)
 APPNAME = "Genshiro"
 APPPATH = "44'/99999996'" --path "44'/434'"
 else
@@ -230,7 +230,7 @@ dep/%.d: %.c Makefile
 .PHONY: listvariants
 listvariants:
 ifeq ($(TARGET_NAME),TARGET_NANOS)
-	@echo VARIANTS COIN GENS
+	@echo VARIANTS COIN Genshiro
 else ifeq ($(TARGET_NAME),TARGET_NANOX)
-	@echo VARIANTS COIN GENS
+	@echo VARIANTS COIN Genshiro
 endif
