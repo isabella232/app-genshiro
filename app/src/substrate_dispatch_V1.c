@@ -29,7 +29,6 @@
 #define PALLET_ID_GENSCROWDLOAN 30
 #define PALLET_ID_GENSOPTOUT    31
 #define PALLET_ID_CURVE_AMM     32
-#define PALLET_ID_EQDEX         35
 
 /// Pallet Utility
 #define METHOD_ID_BATCH 0
@@ -78,16 +77,6 @@
 #define PRIV_ID_GENSOPTOUT_SELL                     GET_CALL_PRIV_IDX(PALLET_ID_GENSOPTOUT, METHOD_ID_GENSOPTOUT_SELL)
 #define PRIV_ID_GENSOPTOUT_DISTRIBUTE_EXTERNAL      GET_CALL_PRIV_IDX(PALLET_ID_GENSOPTOUT, METHOD_ID_GENSOPTOUT_DISTRIBUTE_EXTERNAL)
 #define PRIV_ID_GENSOPTOUT_BUY                      GET_CALL_PRIV_IDX(PALLET_ID_GENSOPTOUT, METHOD_ID_GENSOPTOUT_BUY)
-
-/// Pallet EqDex
-#define METHOD_ID_EQDEX_CREATE_ORDER                0
-#define METHOD_ID_EQDEX_DELETE_ORDER_EXTERNAL       2
-
-#define PRIV_ID_EQDEX_CREATE_ORDER                  GET_CALL_PRIV_IDX(PALLET_ID_EQDEX, METHOD_ID_EQDEX_CREATE_ORDER)
-#define PRIV_ID_EQDEX_DELETE_ORDER_EXTERNAL         GET_CALL_PRIV_IDX(PALLET_ID_EQDEX, METHOD_ID_EQDEX_DELETE_ORDER_EXTERNAL)
-
-
-
 
 /// Pallet Utility
 __Z_INLINE parser_error_t _readMethod_utility_batch_V1(
@@ -222,28 +211,6 @@ __Z_INLINE parser_error_t  _readMethod_gensOptOut_buy_V1(
     return parser_ok;
 }
 
-/// Pallet EqDex
-__Z_INLINE parser_error_t  _readMethod_eqDex_create_order_V1(
-    parser_context_t* c, pd_eqDex_create_order_V1_t* m)
-{
-    CHECK_ERROR(_readAsset(c, &m->asset))
-    CHECK_ERROR(_readOrderType(c, &m->order_type))
-    CHECK_ERROR(_readu8(c, &m->side))
-    CHECK_ERROR(_readFixedU128(c, &m->amount))
-    CHECK_ERROR(_readu64(c, &m->expiration_time))
-    return parser_ok;
-}
-
-__Z_INLINE parser_error_t  _readMethod_eqDex_delete_order_external_V1(
-    parser_context_t* c, pd_eqDex_delete_order_external_V1_t* m)
-{
-    CHECK_ERROR(_readAsset(c, &m->asset))
-    CHECK_ERROR(_readu64(c, &m->order_id))
-    CHECK_ERROR(_readFixedI64(c, &m->price))
-    return parser_ok;
-}
-
-
 
 
 parser_error_t _readMethod_V1(
@@ -315,15 +282,6 @@ parser_error_t _readMethod_V1(
         case PRIV_ID_GENSOPTOUT_BUY:
             CHECK_ERROR(_readMethod_gensOptOut_buy_V1(c, &method->basic.gensOptOut_buy_V1))
             break;
-
-            /// Pallet EqDex
-        case PRIV_ID_EQDEX_CREATE_ORDER:
-            CHECK_ERROR(_readMethod_eqDex_create_order_V1(c, &method->basic.eqDex_create_order_V1))
-            break;
-        case PRIV_ID_EQDEX_DELETE_ORDER_EXTERNAL:
-            CHECK_ERROR(_readMethod_eqDex_delete_order_external_V1(c, &method->basic.eqDex_delete_order_external_V1))
-            break;
-
     default:
         return parser_not_supported;
     }
@@ -355,8 +313,6 @@ const char* _getMethod_ModuleName_V1(uint8_t moduleIdx)
         return STR_MO_CURVE_AMM;
     case PALLET_ID_GENSOPTOUT:
         return STR_MO_GENSOPTOUT;
-    case PALLET_ID_EQDEX:
-        return STR_MO_EQDEX;
     default:
         return NULL;
     }
@@ -407,13 +363,6 @@ const char* _getMethod_Name_V1(uint8_t moduleIdx, uint8_t callIdx)
         return STR_ME_DISTRIBUTE_EXTERNAL;
     case PRIV_ID_GENSOPTOUT_BUY:                  // GensOptOut:buy
         return STR_ME_BUY;
-        /// Pallet EqDex
-    case PRIV_ID_EQDEX_CREATE_ORDER:
-        return STR_ME_CREATE_ORDER;
-    case PRIV_ID_EQDEX_DELETE_ORDER_EXTERNAL:
-        return STR_ME_DELETE_ORDER_EXTERNAL;
-    default:
-        return NULL;
     }
 
     return NULL;
@@ -454,10 +403,6 @@ uint8_t _getMethod_NumItems_V1(uint8_t moduleIdx, uint8_t callIdx)
         return 2;
     case PRIV_ID_GENSOPTOUT_BUY:                    // GensOptOut:buy
         return 1;
-    case PRIV_ID_EQDEX_CREATE_ORDER:                // EqDex:create_order
-        return 5;
-    case PRIV_ID_EQDEX_DELETE_ORDER_EXTERNAL:       // EqDex:delete_order_external
-        return 3;
     default:
         return 0;
     }
@@ -587,32 +532,6 @@ const char* _getMethod_ItemName_V1(uint8_t moduleIdx, uint8_t callIdx, uint8_t i
         switch (itemIdx) {
         case 0:
             return STR_IT_amount;
-        default:
-            return NULL;
-        }
-    case PRIV_ID_EQDEX_CREATE_ORDER:               // EqDex:create_order
-        switch (itemIdx) {
-        case 0:
-            return STR_IT_asset;
-        case 1:
-            return STR_IT_order_type;
-        case 2:
-            return STR_IT_side;
-        case 3:
-            return STR_IT_amount;
-        case 4:
-            return STR_IT_expiration_time;
-        default:
-            return NULL;
-        }
-    case PRIV_ID_EQDEX_DELETE_ORDER_EXTERNAL:      // EqDex:delete_order_external
-        switch (itemIdx) {
-        case 0:
-            return STR_IT_asset;
-        case 1:
-            return STR_IT_order_id;
-        case 2:
-            return STR_IT_price;
         default:
             return NULL;
         }
@@ -852,58 +771,6 @@ parser_error_t _getMethod_ItemValue_V1(
                 default:
                     return parser_no_data;
             }
-        case PRIV_ID_EQDEX_CREATE_ORDER:               // EqDex:create_order
-            switch (itemIdx) {
-                case 0:
-                    return _toStringAsset_V1(
-                            &m->basic.eqDex_create_order_V1.asset,
-                            outValue, outValueLen,
-                            pageIdx, pageCount);
-                case 1:
-                    return _toStringOrderType(
-                            &m->basic.eqDex_create_order_V1.order_type,
-                            outValue, outValueLen,
-                            pageIdx, pageCount);
-                case 2:
-                    return _toStringSide(
-                            &m->basic.eqDex_create_order_V1.side,
-                            outValue, outValueLen,
-                            pageIdx, pageCount);
-                case 3:
-                    return _toStringFixedU128(
-                            &m->basic.eqDex_create_order_V1.amount,
-                            outValue, outValueLen,
-                            pageIdx, pageCount);
-                case 4:
-                    return _toStringu64(
-                            &m->basic.eqDex_create_order_V1.expiration_time,
-                            outValue, outValueLen,
-                            pageIdx, pageCount);
-                default:
-                    return parser_no_data;
-            }
-        case PRIV_ID_EQDEX_DELETE_ORDER_EXTERNAL:      // EqDex:delete_order_external
-            switch (itemIdx) {
-                case 0:
-                    return _toStringAsset_V1(
-                            &m->basic.eqDex_delete_order_external_V1.asset,
-                            outValue, outValueLen,
-                            pageIdx, pageCount);
-                case 1:
-                    return _toStringu64(
-                            &m->basic.eqDex_delete_order_external_V1.order_id,
-                            outValue, outValueLen,
-                            pageIdx, pageCount);
-                case 2:
-                    return _toStringFixedI64(
-                            &m->basic.eqDex_delete_order_external_V1.price,
-                            outValue, outValueLen,
-                            pageIdx, pageCount);
-                default:
-                    return parser_no_data;
-            }
-        default:
-            return parser_ok;
     }
 
     return parser_ok;

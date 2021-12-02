@@ -89,13 +89,13 @@ APP_LOAD_PARAMS = --appFlags 0x200 --delete $(COMMON_LOAD_PARAMS) --path $(APPPA
 
 ifeq ($(TARGET_NAME),TARGET_NANOS)
 APP_STACK_SIZE:=3472
-ICONNAME:=$(CURDIR)/nanos_gens_icon.gif
+ICONNAME:=$(CURDIR)/nanos_icon.gif
 OUTPUT_ELF ?= $(CURDIR)/output/app_s.elf
 OUTPUT_INSTALLER := $(CURDIR)/pkg/installer_s.sh
 endif
 
 ifeq ($(TARGET_NAME),TARGET_NANOX)
-ICONNAME:=$(CURDIR)/nanox_gens_icon.gif
+ICONNAME:=$(CURDIR)/nanox_icon.gif
 OUTPUT_ELF ?= $(CURDIR)/output/app_x.elf
 OUTPUT_INSTALLER:= $(CURDIR)/pkg/installer_x.sh
 endif

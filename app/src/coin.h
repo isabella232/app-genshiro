@@ -19,11 +19,11 @@
 extern "C" {
 #endif
 
-#define CLA                  0x95
+#define CLA                  0x9E
 
 #define HDPATH_LEN_DEFAULT   5
 #define HDPATH_0_DEFAULT     (0x80000000 | 0x2c)
-#define HDPATH_1_DEFAULT     (0x80000000 | 0x5f5e0fd)   // 99999997 - Equilibrium (https://github.com/satoshilabs/slips/blob/master/slip-0044.md)
+#define HDPATH_1_DEFAULT     (0x80000000 | 0x5f5e0fc)   // 99999997 - Equilibrium (https://github.com/satoshilabs/slips/blob/master/slip-0044.md)
 #define HDPATH_1_RECOVERY    (0x80000000 | 0x162)       // 354 - Polkadot
 
 #define SK_LEN_25519         64u
