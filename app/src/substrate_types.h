@@ -69,6 +69,8 @@ enum ChainId {
     Ethereum = 0,
     Substrate = 1,
     BSC = 2,
+    Heco = 3,
+    Polygon = 4,
     CHAIN_ID_MAX
 };
 

@@ -2320,8 +2320,14 @@ parser_error_t _toStringChainId(
         case BSC:
             snprintf(outValue, outValueLen, "BSC");
             break;
+        case Heco:
+            snprintf(outValue, outValueLen, "Heco");
+            break;
+        case Polygon:
+            snprintf(outValue, outValueLen, "Polygon");
+            break;
         default:
-            return parser_chain_id_out_of_range;
+            snprintf(outValue, outValueLen, *v);
     }
     return parser_ok;
 }
