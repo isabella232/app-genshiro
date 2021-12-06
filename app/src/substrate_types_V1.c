@@ -2327,7 +2327,7 @@ parser_error_t _toStringChainId(
             snprintf(outValue, outValueLen, "Polygon");
             break;
         default:
-            snprintf(outValue, outValueLen, *v);
+            snprintf(outValue, outValueLen, "%d", *v);
     }
     return parser_ok;
 }
