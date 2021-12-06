@@ -2395,7 +2395,7 @@ parser_error_t _toStringResourceId(
     } else if (0 == memcmp(v->_ptr, Resource_HDOT, 32)) {
         snprintf(outValue, outValueLen, "HDOT");
     } else {
-        return snprintf(outValue, outValueLen, "%H", b);
+        return snprintf(outValue, outValueLen, "%H", v->_ptr);
     }
 
     return parser_ok;
