@@ -2342,7 +2342,7 @@ parser_error_t _toStringResourceId_V1(
     CLEAN_AND_CHECK()
     *pageCount = 1;
 
-    return _toStringResourceId(v, outValue, outValueLen);
+    return _toStringResourceId(v, outValue, outValueLen, pageIdx, pageCount);
 }
 
 static const uint8_t Resource_EQ[]   = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc7, 0x6e, 0xbe, 0x4a, 0x02, 0xbb, 0xc3, 0x47, 0x86, 0xd8, 0x60, 0xb3, 0x55, 0xf5, 0xa5, 0xce, 0x00 };
@@ -2362,7 +2362,9 @@ static const uint8_t Resource_HDOT[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0
 parser_error_t _toStringResourceId(
         const pd_u8_array_32_V1_t * v,
         char* outValue,
-        uint16_t outValueLen)
+        uint16_t outValueLen,
+        uint8_t pageIdx,
+        uint8_t* pageCount)
 {
     if (v == NULL) {
         return parser_no_data;
@@ -2395,7 +2397,7 @@ parser_error_t _toStringResourceId(
     } else if (0 == memcmp(v->_ptr, Resource_HDOT, 32)) {
         snprintf(outValue, outValueLen, "HDOT");
     } else {
-        return snprintf(outValue, outValueLen, "%H", v->_ptr);
+        return _toStringu8_array_32_V1(v, outValue, outValueLen, pageIdx, pageCount);
     }
 
     return parser_ok;
