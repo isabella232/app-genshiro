@@ -67,10 +67,12 @@ typedef enum Subaccount eq_Subaccount_t;
 /// Types of chains. Used in withdraw with bridge
 enum ChainId {
     Ethereum = 0,
-    Substrate = 1,
+    GenshiroStandalone = 1,
     BSC = 2,
     Heco = 3,
     Polygon = 4,
+    Aurora = 5,
+    GenshiroParachain = 6,
     CHAIN_ID_MAX
 };
 

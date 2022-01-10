@@ -2314,8 +2314,8 @@ parser_error_t _toStringChainId(
         case Ethereum:
             snprintf(outValue, outValueLen, "Ethereum");
             break;
-        case Substrate:
-            snprintf(outValue, outValueLen, "Substrate");
+        case GenshiroStandalone:
+            snprintf(outValue, outValueLen, "Genshiro Standalone");
             break;
         case BSC:
             snprintf(outValue, outValueLen, "BSC");
@@ -2325,6 +2325,9 @@ parser_error_t _toStringChainId(
             break;
         case Polygon:
             snprintf(outValue, outValueLen, "Polygon");
+            break;
+        case GenshiroParachain:
+            snprintf(outValue, outValueLen, "Genshiro Parachain");
             break;
         default:
             snprintf(outValue, outValueLen, "%d", *v);
