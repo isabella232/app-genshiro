@@ -805,7 +805,9 @@ parser_error_t _toStringResourceId_V1(
 parser_error_t _toStringResourceId(
         const pd_u8_array_32_V1_t * v,
         char* outValue,
-        uint16_t outValueLen);
+        uint16_t outValueLen,
+        uint8_t pageIdx,
+        uint8_t* pageCount);
 
 #ifdef __cplusplus
 }
